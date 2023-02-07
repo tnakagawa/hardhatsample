@@ -12,44 +12,50 @@ describe("Token", function () {
     };
     describe("deploy", function () {
         it("owner", async function () {
-            const { contract, name, symbol, deployer, owner, initAmount } = await loadFixture(deployContract);
+            const { contract, deployer, owner, initAmount } = await loadFixture(deployContract);
             expect(await contract.owner()).to.equal(owner.address);
         });
         it("name", async function () {
-            const { contract, name, symbol, deployer, owner, initAmount } = await loadFixture(deployContract);
+            const { contract, deployer, owner, initAmount } = await loadFixture(deployContract);
             expect(await contract.name()).to.equal("Token Sample");
         });
         it("symbol", async function () {
-            const { contract, name, symbol, deployer, owner, initAmount } = await loadFixture(deployContract);
+            const { contract, deployer, owner, initAmount } = await loadFixture(deployContract);
             expect(await contract.symbol()).to.equal("TSC");
         });
         it("initAmount", async function () {
-            const { contract, name, symbol, deployer, owner, initAmount } = await loadFixture(deployContract);
+            const { contract, deployer, owner, initAmount } = await loadFixture(deployContract);
             expect(await contract.totalSupply()).to.equal(initAmount);
+            expect(await contract.balanceOf(owner.address)).to.equal(initAmount);
+            expect(await contract.balanceOf(deployer.address)).to.equal(0);
         });
     });
     describe("onlyOwner", function () {
         it("mint <owner>", async function () {
-            const { contract, name, symbol, deployer, owner, initAmount } = await loadFixture(deployContract);
+            const { contract, deployer, owner, initAmount } = await loadFixture(deployContract);
             const totalSupply = await contract.totalSupply();
+            const balanceOf = await contract.balanceOf(owner.address);
             const mintAmount = 100;
             await contract.connect(owner).mint(mintAmount);
             expect(await contract.totalSupply()).to.equal(totalSupply.add(mintAmount));
+            expect(await contract.balanceOf(owner.address)).to.equal(balanceOf.add(mintAmount));
         });
         it("mint <not owner>", async function () {
-            const { contract, name, symbol, deployer, owner, initAmount } = await loadFixture(deployContract);
+            const { contract, deployer, owner, initAmount } = await loadFixture(deployContract);
             const mintAmount = 100;
             await expect(contract.connect(deployer).mint(mintAmount)).to.rejected;
         });
         it("burn <owner>", async function () {
-            const { contract, name, symbol, deployer, owner, initAmount } = await loadFixture(deployContract);
+            const { contract, deployer, owner, initAmount } = await loadFixture(deployContract);
             const totalSupply = await contract.totalSupply();
+            const balanceOf = await contract.balanceOf(owner.address);
             const burnAmount = 100;
             await contract.connect(owner).burn(burnAmount);
             expect(await contract.totalSupply()).to.equal(totalSupply.sub(burnAmount));
+            expect(await contract.balanceOf(owner.address)).to.equal(balanceOf.sub(burnAmount));
         });
         it("burn <not owner>", async function () {
-            const { contract, name, symbol, deployer, owner, initAmount } = await loadFixture(deployContract);
+            const { contract, deployer, owner, initAmount } = await loadFixture(deployContract);
             const burnAmount = 100;
             await expect(contract.connect(deployer).burn(burnAmount)).to.rejected;
         });
